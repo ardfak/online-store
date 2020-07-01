@@ -1,8 +1,19 @@
 const { Router } = require('express')
+const regEmail = require('../emails/registration')
 const bcrypt = require('bcryptjs')
+const nodemailer = require('nodemailer')
 const User = require('../models/user')
-
+const mail = require('mail')
 const router = Router()
+
+const userEmail = 'bagavdin0122@gmail.com'
+const userPassword = 'ardfac0122'
+
+const transporter = mail.Mail({
+  host: 'smtp.gmail.com',
+  username: userEmail,
+  password: userPassword
+})
 
 router.get('/login', async (req, res) => {
   res.render('auth/login', {
@@ -66,6 +77,11 @@ router.post('/register', async (req, res) => {
       cart: { items: [] }
     })
     await user.save()
+    await transporter
+      .message(regEmail())
+      .body('Node speaks SMTP!')
+      .send(function (err) {})
+
     res.redirect('/auth/login#login')
   }
 })

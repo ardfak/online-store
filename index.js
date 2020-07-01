@@ -13,6 +13,7 @@ const coursesRoutes = require('./routes/courses')
 const ordersRoutes = require('./routes/orders')
 const csrf = require('csurf')
 const varMiddleware = require('./middleware/variables')
+const keys = require('./keys')
 const userMiddleware = require('./middleware/user')
 
 const app = express()
@@ -21,12 +22,9 @@ const hbs = exphbs.create({
   extname: 'hbs'
 })
 
-const MONGODB_URI =
-  'mongodb+srv://bagavdin:wrwstling@cluster0-3teno.mongodb.net/shop'
-
 const store = new MongoStore({
   collections: 'session',
-  uri: MONGODB_URI
+  uri: keys.MONGODB_URI
 })
 
 app.engine('hbs', hbs.engine)
@@ -37,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true }))
 app.use(
   session({
-    secret: 'ardfak',
+    secret: keys.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store
@@ -59,7 +57,7 @@ const PORT = process.env.PORT || 3000
 
 async function start() {
   try {
-    await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(keys.MONGODB_URI, {
       useNewUrlParser: true,
       useFindAndModify: false
     })
