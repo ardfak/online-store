@@ -19,12 +19,13 @@ const userMiddleware = require('./middleware/user')
 const app = express()
 const hbs = exphbs.create({
   defaultLayout: 'main',
-  extname: 'hbs'
+  extname: 'hbs',
+  helpers: require('./utils/hbs-helper'),
 })
 
 const store = new MongoStore({
   collections: 'session',
-  uri: keys.MONGODB_URI
+  uri: keys.MONGODB_URI,
 })
 
 app.engine('hbs', hbs.engine)
@@ -38,7 +39,7 @@ app.use(
     secret: keys.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store
+    store,
   })
 )
 app.use(csrf())
@@ -59,7 +60,7 @@ async function start() {
   try {
     await mongoose.connect(keys.MONGODB_URI, {
       useNewUrlParser: true,
-      useFindAndModify: false
+      useFindAndModify: false,
     })
 
     app.listen(PORT, () => {
