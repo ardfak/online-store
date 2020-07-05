@@ -6,7 +6,7 @@ const { validationResult } = require('express-validator/check')
 const User = require('../models/user')
 const mail = require('mail')
 const router = Router()
-const { registerValidators } = require('../utils/validators')
+const { registerValidators, loginValidator } = require('../utils/validators')
 
 router.get('/login', async (req, res) => {
   res.render('auth/login', {
@@ -17,9 +17,14 @@ router.get('/login', async (req, res) => {
   })
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginValidator, async (req, res) => {
   try {
     const { email, password } = req.body
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      req.flash('registerError', errors.array()[0].msg)
+      return res.status(422).redirect('/auth/login#login')
+    }
 
     const candidate = await User.findOne({ email })
     if (candidate) {

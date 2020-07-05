@@ -32,3 +32,17 @@ exports.registerValidators = [
     .withMessage('Имя должно быть минимум 3 символа')
     .trim(),
 ]
+
+exports.loginValidator = [
+  body('email', 'Введите корректный email').normalizeEmail().isEmail(),
+  body('password', 'Введите пароль').exists(),
+]
+
+exports.courseValidator = [
+  body('title')
+    .isLength({ min: 3 })
+    .withMessage('Минимальная длинна названия 3 символа')
+    .trim(),
+  body('price').isNumeric().withMessage('Введите корректную цену'),
+  body('img', 'Введите корректный url картинки').isURL(),
+]
