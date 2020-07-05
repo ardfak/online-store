@@ -2,25 +2,18 @@ const { Router } = require('express')
 const regEmail = require('../emails/registration')
 const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
+const { validationResult } = require('express-validator/check')
 const User = require('../models/user')
 const mail = require('mail')
 const router = Router()
-
-const userEmail = 'bagavdin0122@gmail.com'
-const userPassword = 'ardfac0122'
-
-const transporter = mail.Mail({
-  host: 'smtp.gmail.com',
-  username: userEmail,
-  password: userPassword
-})
+const { registerValidators } = require('../utils/validators')
 
 router.get('/login', async (req, res) => {
   res.render('auth/login', {
     title: 'Авторизация',
     isLogin: true,
     loginError: req.flash('loginError'),
-    registerError: req.flash('registerError')
+    registerError: req.flash('registerError'),
   })
 })
 
@@ -60,30 +53,29 @@ router.get('/logout', async (req, res) => {
   })
 })
 
-router.post('/register', async (req, res) => {
-  const { email, password, confirm, name } = req.body
+router.post('/register', registerValidators, async (req, res) => {
+  const { email, password, name } = req.body
 
-  const candidate = await User.findOne({ email })
-
-  if (candidate) {
-    req.flash('registerError', 'Пользователь с таким email уже существует')
-    res.redirect('/auth/login#register')
-  } else {
-    const hashPassword = await bcrypt.hash(password, 10)
-    const user = new User({
-      email,
-      password: hashPassword,
-      name,
-      cart: { items: [] }
-    })
-    await user.save()
-    await transporter
-      .message(regEmail())
-      .body('Node speaks SMTP!')
-      .send(function (err) {})
-
-    res.redirect('/auth/login#login')
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    req.flash('registerError', errors.array()[0].msg)
+    return res.status(422).redirect('/auth/login#register')
   }
+
+  const hashPassword = await bcrypt.hash(password, 10)
+  const user = new User({
+    email,
+    password: hashPassword,
+    name,
+    cart: { items: [] },
+  })
+  await user.save()
+  await transporter
+    .message(regEmail())
+    .body('Node speaks SMTP!')
+    .send(function (err) {})
+
+  res.redirect('/auth/login#login')
 })
 
 module.exports = router
