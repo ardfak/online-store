@@ -13,17 +13,22 @@ exports.registerValidators = [
       } catch (e) {
         console.log(e)
       }
-    }),
+    })
+    .normalizeEmail(),
   body('password', 'Минимальная длинна пароля 6 символов')
     .isLength({ min: 6, max: 56 })
-    .isAlphanumeric(),
-  body('confirm').custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error('Пароли не совпадают')
-    }
-    return true
-  }),
+    .isAlphanumeric()
+    .trim(),
+  body('confirm')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Пароли не совпадают')
+      }
+      return true
+    })
+    .trim(),
   body('name')
     .isLength({ min: 3 })
-    .withMessage('Имя должно быть минимум 3 символа'),
+    .withMessage('Имя должно быть минимум 3 символа')
+    .trim(),
 ]
