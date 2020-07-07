@@ -9,6 +9,7 @@ const cardRoutes = require('./routes/card')
 const addRoutes = require('./routes/add')
 const MongoStore = require('connect-mongodb-session')(session)
 const authRoutes = require('./routes/auth')
+const errorHandle = require('./middleware/error')
 const coursesRoutes = require('./routes/courses')
 const ordersRoutes = require('./routes/orders')
 const csrf = require('csurf')
@@ -53,6 +54,8 @@ app.use('/courses', coursesRoutes)
 app.use('/card', cardRoutes)
 app.use('/orders', ordersRoutes)
 app.use('/auth', authRoutes)
+
+app.use(errorHandle)
 
 const PORT = process.env.PORT || 3000
 
